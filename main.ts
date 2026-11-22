@@ -1,2 +1,74 @@
-import o from"node:fs";import f from"node:path";const M=process.env.MAKEFUN_INPUT_DIR??"/input",v=process.env.MAKEFUN_OUTPUT_DIR??"/output";for(const I of o.readdirSync(M).sort()){const S=f.join(M,I),n=o.readFileSync(f.join(S,"program.bin")),g=o.readFileSync(f.join(S,"input.bin")),r=new Int32Array(256),j=new Int32Array(64),A=new Int32Array(256),y=new Uint8Array(65536);let t=0,a=0,d=0,F=0,p=0,U=0,b=0;const i=x=>r[a-x];for(;;){if(U>=1e6){b=10;break}if(t<0||t>=n.length){b=9;break}const x=t,e=n[t++];let u=0;if(e===1?u=1:(e===2||e===48||e===49||e===50||e===51)&&(u=e===2?4:2),t+u>n.length){b=9;break}if(!(e<=7||e>=16&&e<=30||e>=32&&e<=34||e>=48&&e<=52||e===64||e===65||e>=80&&e<=83)){b=5;break}const _=e===3||e===4||e===23||e===27||e===49||e===50||e===64||e===80||e===81||e===83?1:e===5||e===6||e>=16&&e<=22||e>=24&&e<=26||e>=28&&e<=30||e>=32&&e<=34||e===65?2:e===7?3:0;if(a<_){b=2;break}if((e===1||e===2||e===4||e===6||e===82)&&a===256){b=3;break}const k=e===1?n[t]:e===2?n.readInt32LE(t):e===48||e===49||e===50?n.readInt16LE(t):e===51?n[t]|n[t+1]<<8:0;if((e===19||e===20||e===21||e===22)&&i(1)===0){b=4;break}if(e===51&&d===64){b=7;break}if(e===52&&d===0){b=8;break}if(e===64&&i(1)<0||e===64&&i(1)>255||e===65&&(i(1)<0||i(1)>255)){b=6;break}if(e===80){const m=String(i(1)),E=m.length;if(p+E>65536){b=11;break}for(let w=0;w<E;w++)y[p++]=m.charCodeAt(w)}else if(e===81){if(p===65536){b=11;break}y[p++]=i(1)&255}U++;const c=i(2),s=i(1),l=t+u;switch(t=l,e){case 0:b=0,t=-1;break;case 1:r[a++]=k<<24>>24;break;case 2:r[a++]=k;break;case 3:a--;break;case 4:r[a]=r[a-1],a++;break;case 5:r[a-2]=s,r[a-1]=c;break;case 6:r[a]=c,a++;break;case 7:{const m=r[a-3];r[a-3]=c,r[a-2]=s,r[a-1]=m;break}case 16:a-=2,r[a++]=c+s;break;case 17:a-=2,r[a++]=c-s;break;case 18:a-=2,r[a++]=Math.imul(c,s);break;case 19:a-=2,r[a++]=c===-2147483648&&s===-1?-2147483648:Math.trunc(c/s);break;case 20:a-=2,r[a++]=c===-2147483648&&s===-1?0:c%s;break;case 21:a-=2,r[a++]=(c>>>0)/(s>>>0)|0;break;case 22:a-=2,r[a++]=(c>>>0)%(s>>>0)|0;break;case 23:r[a-1]=-s;break;case 24:a-=2,r[a++]=c&s;break;case 25:a-=2,r[a++]=c|s;break;case 26:a-=2,r[a++]=c^s;break;case 27:r[a-1]=~s;break;case 28:a-=2,r[a++]=c<<(s&31);break;case 29:a-=2,r[a++]=c>>(s&31);break;case 30:a-=2,r[a++]=c>>>(s&31);break;case 32:a-=2,r[a++]=c===s?1:0;break;case 33:a-=2,r[a++]=c<s?1:0;break;case 34:a-=2,r[a++]=c>>>0<s>>>0?1:0;break;case 48:t=l+k;break;case 49:a--,s===0&&(t=l+k);break;case 50:a--,s!==0&&(t=l+k);break;case 51:j[d++]=l,t=k;break;case 52:t=j[--d];break;case 64:r[a-1]=A[s];break;case 65:A[s]=c,a-=2;break;case 80:a--;break;case 81:a--;break;case 82:r[a++]=F<g.length?g[F++]:-1;break;case 83:b=s&255,t=-1;break}if(t===-1)break}const h=f.join(v,I);o.mkdirSync(h,{recursive:!0}),o.writeFileSync(f.join(h,"stdout.bin"),y.subarray(0,p)),o.writeFileSync(f.join(h,"exit.txt"),String(b)+`
-`)}
+import fs from'node:fs';
+import path from'node:path';
+const I=process.env.MAKEFUN_INPUT_DIR??'/input',O=process.env.MAKEFUN_OUTPUT_DIR??'/output';
+for(const id of fs.readdirSync(I).sort()){
+ const d=path.join(I,id),p=fs.readFileSync(path.join(d,'program.bin')),n=fs.readFileSync(path.join(d,'input.bin'));
+ const s=new Int32Array(256),c=new Int32Array(64),m=new Int32Array(256),o=new Uint8Array(65536);
+ let pc=0,sp=0,cp=0,ip=0,used=0,steps=0,exit=0,done=false;
+ while(!done){
+  if(steps>=1e6){exit=10;break}
+  if(pc<0||pc>=p.length){exit=9;break}
+  const op=p[pc];
+  if(!(op<=7||op>=16&&op<=30||op>=32&&op<=34||op>=48&&op<=52||op===64||op===65||op>=80&&op<=83)){exit=5;break}
+  pc++;
+  const size=op===1?1:op===2?4:op>=48&&op<=51?2:0;
+  if(pc+size>p.length){exit=9;break}
+  const need=op===3||op===4||op===23||op===27||op===49||op===50||op===64||op===80||op===81||op===83?1:
+   op===5||op===6||op>=16&&op<=22||op>=24&&op<=26||op>=28&&op<=30||op>=32&&op<=34||op===65?2:op===7?3:0;
+  if(sp<need){exit=2;break}
+  if((op===1||op===2||op===4||op===6||op===82)&&sp===256){exit=3;break}
+  const imm=op===1?p[pc]:op===2?p.readInt32LE(pc):op>=48&&op<=50?p.readInt16LE(pc):op===51?p[pc]|p[pc+1]<<8:0;
+  const a=sp>1?s[sp-2]:0,b=sp?s[sp-1]:0;
+  if(op>=19&&op<=22&&b===0){exit=4;break}
+  if(op===51&&cp===64||op===52&&cp===0){exit=op===51?7:8;break}
+  if((op===64||op===65)&&(b<0||b>255)){exit=6;break}
+  if(op===80||op===81){
+   const t=op===80?String(b):'',len=op===80?t.length:1;
+   if(used+len>o.length){exit=11;break}
+   if(op===80){for(let i=0;i<len;i++)o[used++]=t.charCodeAt(i)}else o[used++]=b&255;
+  }
+  steps++;
+  const next=pc+size;pc=next;
+  switch(op){
+   case 0:done=true;break;
+   case 1:s[sp++]=(imm<<24)>>24;break;
+   case 2:s[sp++]=imm;break;
+   case 3:sp--;break;
+   case 4:s[sp]=s[sp-1];sp++;break;
+   case 5:s[sp-2]=b;s[sp-1]=a;break;
+   case 6:s[sp++]=a;break;
+   case 7:{const x=s[sp-3];s[sp-3]=a;s[sp-2]=b;s[sp-1]=x;break}
+   case 16:sp-=2;s[sp++]=a+b;break;
+   case 17:sp-=2;s[sp++]=a-b;break;
+   case 18:sp-=2;s[sp++]=Math.imul(a,b);break;
+   case 19:sp-=2;s[sp++]=a===-2147483648&&b===-1?-2147483648:Math.trunc(a/b);break;
+   case 20:sp-=2;s[sp++]=a===-2147483648&&b===-1?0:a%b;break;
+   case 21:sp-=2;s[sp++]=((a>>>0)/(b>>>0))|0;break;
+   case 22:sp-=2;s[sp++]=((a>>>0)%(b>>>0))|0;break;
+   case 23:s[sp-1]=-b;break;
+   case 24:sp-=2;s[sp++]=a&b;break;
+   case 25:sp-=2;s[sp++]=a|b;break;
+   case 26:sp-=2;s[sp++]=a^b;break;
+   case 27:s[sp-1]=~b;break;
+   case 28:sp-=2;s[sp++]=a<<(b&31);break;
+   case 29:sp-=2;s[sp++]=a>>(b&31);break;
+   case 30:sp-=2;s[sp++]=a>>>(b&31);break;
+   case 32:sp-=2;s[sp++]=a===b?1:0;break;
+   case 33:sp-=2;s[sp++]=a<b?1:0;break;
+   case 34:sp-=2;s[sp++]=(a>>>0)<(b>>>0)?1:0;break;
+   case 48:pc=next+imm;break;
+   case 49:sp--;if(b===0)pc=next+imm;break;
+   case 50:sp--;if(b!==0)pc=next+imm;break;
+   case 51:c[cp++]=next;pc=imm;break;
+   case 52:pc=c[--cp];break;
+   case 64:s[sp-1]=m[b];break;
+   case 65:m[b]=a;sp-=2;break;
+   case 80:case 81:sp--;break;
+   case 82:s[sp++]=ip<n.length?n[ip++]:-1;break;
+   case 83:exit=b&255;done=true;break;
+  }
+ }
+ const dest=path.join(O,id);fs.mkdirSync(dest,{recursive:true});
+ fs.writeFileSync(path.join(dest,'stdout.bin'),o.subarray(0,used));
+ fs.writeFileSync(path.join(dest,'exit.txt'),String(exit)+'\n');
+}
